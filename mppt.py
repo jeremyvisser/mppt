@@ -62,14 +62,13 @@ class MPPT(object):
 
 	"""
 
-	def __init__(self, target, timeout=5, retries=3, retry_delay=1.0, validate_checksum=True):
+	def __init__(self, target, timeout=5, validate_checksum=True):
 		"""	Constructor: opens connection to BlueSolar MPPT controller.
 			usage for TCP socket: MPPT(('192.168.88.1', 26001))
 			usage for serial:     MPPT('/dev/ttyS0')
 		"""
 
-		self.retries = retries
-		self.retry_delay = retry_delay
+		self.validate_checksum = validate_checksum
 
 		if isinstance(target, (list, tuple)): # socket connection
 			for res in socket.getaddrinfo(target[0], target[1], socket.AF_UNSPEC, socket.SOCK_STREAM):
@@ -109,7 +108,7 @@ class MPPT(object):
 			are tolerated by skipping them and retrying until
 			a checksum-passing series of lines is found.
 		"""
-		failures_remaining = 10
+		failures_remaining = 30
 
 		while failures_remaining > 0:
 			failures_remaining -= 1
@@ -165,7 +164,7 @@ class MPPT(object):
 					if checksum % 256 == 0:
 						return status
 					else:
-						if validate_checksum:
+						if self.validate_checksum:
 							break
 						else:
 							if failures_remaining < 2:
