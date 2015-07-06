@@ -161,6 +161,13 @@ class MPPT(object):
 					checksum += ord(char)
 
 				if key == 'Checksum':
+
+					# adding custom calculated fields not from controller:
+					if 'IPV' not in status.keys() \
+							and 'VPV' in status.keys() \
+							and 'PPV' in status.keys():
+						status['IPV'] = status['PPV'] / status['VPV']
+
 					if checksum % 256 == 0:
 						return status
 					else:
